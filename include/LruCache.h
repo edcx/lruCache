@@ -10,6 +10,7 @@
 #include <optional>
 #include <unordered_map>
 #include <list>
+#include <cassert>
 
 namespace edcx
 {
@@ -17,7 +18,9 @@ namespace edcx
     class LruCache
     {
     public:
-        explicit LruCache(size_t capacity) : mCapacity(capacity) {}
+        explicit LruCache(size_t capacity) : mCapacity(capacity)
+        {
+        }
 
         /**
          * @brief Returns the key's value from the cache if it exists.
@@ -54,6 +57,7 @@ namespace edcx
 
             if (mCache.size() == mCapacity)
             {
+                assert(mCapacity != 0);
                 // Cache is full, evict the least recently used item (back of list)
                 auto lruKey = mUsageOrder.back();
                 mUsageOrder.pop_back();
