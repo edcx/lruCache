@@ -8,7 +8,8 @@
 #pragma once
 
 #include <optional>
-#include <memory>
+#include <unordered_map>
+#include <list>
 
 namespace edcx
 {
@@ -24,7 +25,14 @@ namespace edcx
          */
         std::optional<Value> get(const Key &key)
         {
-            return std::nullopt;
+            auto it = mCache.find(key);
+            if (it == mCache.end())
+            {
+                return std::nullopt; // Cache miss
+            }
+            // Move accessed key to the front of the usage order
+            mUsageOrder.splice(mUsageOrder.begin(), mUsageOrder, it->second.second);
+            return it->second.first;
         }
 
         /**
@@ -35,7 +43,27 @@ namespace edcx
          */
         bool put(const Key &key, const Value &value)
         {
-            throw;
+            auto it = mCache.find(key);
+            if (it != mCache.end())
+            {
+                // Update existing key and move to front
+                mUsageOrder.splice(mUsageOrder.begin(), mUsageOrder, it->second.second);
+                it->second.first = value;
+                return false; // No eviction
+            }
+
+            if (mCache.size() == mCapacity)
+            {
+                // Cache is full, evict the least recently used item (back of list)
+                auto lruKey = mUsageOrder.back();
+                mUsageOrder.pop_back();
+                mCache.erase(lruKey);
+            }
+
+            // Insert new item
+            mUsageOrder.push_front(key);
+            mCache[key] = {value, mUsageOrder.begin()};
+            return true; // Eviction occurred if cache was full
         }
 
         /**
@@ -44,7 +72,7 @@ namespace edcx
          */
         bool contains(const Key &key)
         {
-            throw;
+            return mCache.find(key) != mCache.end();
         }
 
         /**
@@ -53,7 +81,12 @@ namespace edcx
          */
         std::optional<Value> peek(const Key &key)
         {
-            throw;
+            auto it = mCache.find(key);
+            if (it == mCache.end())
+            {
+                return std::nullopt; // Cache miss
+            }
+            return it->second.first;
         }
 
         /**
@@ -61,7 +94,12 @@ namespace edcx
          */
         void remove(const Key &key)
         {
-            throw;
+            auto it = mCache.find(key);
+            if (it != mCache.end())
+            {
+                mUsageOrder.erase(it->second.second);
+                mCache.erase(it);
+            }
         }
 
         /**
@@ -69,13 +107,14 @@ namespace edcx
          */
         void clear()
         {
-            throw;
+            mCache.clear();
+            mUsageOrder.clear();
         }
 
         /**
          * @brief Returns the number of entries in the cache.
          */
-        size_t size() const { return 0; }
+        size_t size() const { return mCache.size(); }
 
         /**
          * @brief Returns the capacity of the cache.
@@ -87,12 +126,30 @@ namespace edcx
          * if the new capacity is less than the number of entries in the
          * cache.
          */
-        void resize(size_t capacity)
+        void resize(size_t newCapacity)
         {
-            throw;
+            if (newCapacity >= mCapacity)
+            {
+                // Increase capacity or keep it the same, no eviction needed
+                mCapacity = newCapacity;
+                return;
+            }
+
+            // Decrease capacity, evict items if necessary
+            while (mCache.size() > newCapacity)
+            {
+                // Evict from the back (least recently used item)
+                auto lruKey = mUsageOrder.back();
+                mUsageOrder.pop_back();
+                mCache.erase(lruKey);
+            }
+
+            mCapacity = newCapacity;
         }
 
     private:
         size_t mCapacity;
+        std::list<Key> mUsageOrder; // Stores keys in LRU order
+        std::unordered_map<Key, std::pair<Value, typename std::list<Key>::iterator>> mCache;
     };
 } // namespace edcx
