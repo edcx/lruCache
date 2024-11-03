@@ -10,7 +10,7 @@ FetchContent_MakeAvailable(Catch2)
 
 project(LruCacheTest)
 
-file (GLOB_RECURSE SOURCES source/*.cpp)
+file (GLOB_RECURSE SOURCES *.cpp)
 
 # These tests can use the Catch2-provided main
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -18,6 +18,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Catch2::Catch2WithMain)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../include)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_WARNING_AS_ERROR ON)
 
 include(Catch)
 catch_discover_tests(${PROJECT_NAME})
