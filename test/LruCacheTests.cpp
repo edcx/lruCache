@@ -1,5 +1,5 @@
-#include <catch2/catch_test_macros.hpp>
 #include "LruCache.h"
+#include <catch2/catch_test_macros.hpp>
 
 using namespace edcx;
 
@@ -13,7 +13,7 @@ TEST_CASE("Basic LRU Cache Operations")
         cache.put(2, 200);
         cache.put(3, 300);
 
-        REQUIRE(cache.get(1) == 100);          // Cache hit
+        REQUIRE(cache.get(1) == 100); // Cache hit
         REQUIRE(cache.get(4) == std::nullopt); // Cache miss
     }
 
@@ -36,8 +36,8 @@ TEST_CASE("Eviction Policy")
         cache.put(3, 300); // Should evict key 1
 
         REQUIRE(cache.get(1) == std::nullopt); // Key 1 was evicted
-        REQUIRE(cache.get(2) == 200);          // Key 2 should still be in cache
-        REQUIRE(cache.get(3) == 300);          // Key 3 should still be in cache
+        REQUIRE(cache.get(2) == 200); // Key 2 should still be in cache
+        REQUIRE(cache.get(3) == 300); // Key 3 should still be in cache
     }
 }
 
@@ -72,8 +72,8 @@ TEST_CASE("Resize Method")
         cache.resize(2); // Decrease capacity to 2, should evict key 1 (least recently used)
 
         REQUIRE(cache.get(1) == std::nullopt); // Key 1 should be evicted
-        REQUIRE(cache.get(2) == 200);          // Key 2 should still be in cache
-        REQUIRE(cache.get(3) == 300);          // Key 3 should still be in cache
+        REQUIRE(cache.get(2) == 200); // Key 2 should still be in cache
+        REQUIRE(cache.get(3) == 300); // Key 3 should still be in cache
     }
 }
 
@@ -102,7 +102,7 @@ TEST_CASE("Clear and Size Checking")
         cache.put(3, 300);
         REQUIRE(cache.size() == 3); // Cache should be full now
 
-        cache.put(4, 400);          // Should evict the least recently used item
+        cache.put(4, 400); // Should evict the least recently used item
         REQUIRE(cache.size() == 3); // Size should still be 3 after eviction
     }
 }
@@ -133,8 +133,8 @@ TEST_CASE("Peek method does not modify recently used-ness")
     cache.put(1, 100);
     cache.put(2, 200);
 
-    REQUIRE(cache.peek(1) == 100);         // Cache hit
-    cache.put(3, 300);                     // Should evict key 1
+    REQUIRE(cache.peek(1) == 100); // Cache hit
+    cache.put(3, 300); // Should evict key 1
     REQUIRE(cache.get(1) == std::nullopt); // Cache miss
 }
 
@@ -147,7 +147,7 @@ TEST_CASE("Remove method")
 
     SECTION("Remove an existing key")
     {
-        cache.remove(1);                       // 1 is removed
+        cache.remove(1); // 1 is removed
         REQUIRE(cache.get(1) == std::nullopt); // Cache miss
     }
     SECTION("Remove a non-existing key")
